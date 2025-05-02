@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-multipart
+pydantic
+pytesseract
+Pillow
+fitz  # PyMuPDF
+pandas
+openpyxl
+python-docx
+chromadb
+sentence-transformers
