@@ -1,89 +1,39 @@
-<<<<<<< HEAD
-from fastapi import FastAPI, File, UploadFile, Form, Request
-from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
-import os
-=======
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from tempfile import NamedTemporaryFile
->>>>>>> origin/Sparsh
 import shutil
 import mimetypes
 import requests
 from dotenv import load_dotenv
 import os
+
+from openai import OpenAI
 from extract_utils import extract_file_text, call_openai_extraction
 from models import MessageRequest, SearchRequest
 from chroma_utils import store_contacts_in_chroma
+from chatbot_utils import run_chatbot
 
-<<<<<<< HEAD
-from extract_utils import extract_info_from_file
-from chroma_utils import insert_to_chroma
-=======
+# Load environment variables
 load_dotenv()
 SERPAPI_KEY = os.getenv("SERPAPI_KEY")
 if not SERPAPI_KEY:
     raise RuntimeError("❌ SERPAPI_KEY is missing. Check your .env file.")
->>>>>>> origin/Sparsh
 
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# Initialize FastAPI app
 app = FastAPI(title="LinkedIn Contact Extractor & Message Generator")
 
-<<<<<<< HEAD
-# Allow CORS for dev
+# CORS settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-UPLOAD_DIR = "temp_uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-# ========== File Upload Route ==========
-@app.post("/add-file")
-async def add_file(file: UploadFile = File(...), event_name: Optional[str] = Form(None)):
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
-    with open(file_path, "wb") as f:
-        shutil.copyfileobj(file.file, f)
-
-    extracted = extract_info_from_file(file_path, file.filename)
-    os.remove(file_path)
-
-    records = []
-    for entry in extracted:
-        record = {
-            "name": entry.get("name"),
-            "company": entry.get("company"),
-            "source_file": file.filename,
-            "event_name": event_name,
-        }
-        records.append(record)
-
-    insert_to_chroma(records)
-    return {"status": "success", "records_added": len(records), "records": records}
-
-# ========== Manual Entry Route ==========
-@app.post("/add-manual")
-async def add_manual(request: Request):
-    body = await request.json()
-    print("🚀 Incoming Manual Data:", body)
-
-    required_fields = ["name", "company", "event_name"]
-    for field in required_fields:
-        if field not in body:
-            return {"error": f"Missing field: {field}"}
-
-    record = {
-        "name": body.get("name"),
-        "company": body.get("company"),
-        "event_name": body.get("event_name"),
-        "source_file": body.get("source_file", "manual-entry")
-    }
-
-    insert_to_chroma([record])
-    return {"status": "success", "records_added": 1, "records": [record]}
-=======
+# 🔍 LinkedIn profile search using SerpAPI
 def search_linkedin_profiles(name, company, max_results=5):
     query = f'"{name}" {company} site:linkedin.com/in/'
     url = "https://serpapi.com/search"
@@ -103,11 +53,7 @@ def search_linkedin_profiles(name, company, max_results=5):
         for r in results if r.get("link") and "/in/" in r.get("link")
     ]
 
-@app.post("/search_linkedin")
-def search_linkedin(req: SearchRequest):
-    candidates = search_linkedin_profiles(req.name, req.company, req.max_results)
-    return {"message": "Manual selection recommended. Top 3 candidates returned.", "candidates": candidates[:3]}
-
+# 📤 Upload & extract endpoint
 @app.post("/upload_and_extract")
 async def upload_and_extract(file: UploadFile = File(...)):
     suffix = file.filename.split(".")[-1]
@@ -129,22 +75,48 @@ Return ONLY a JSON array. No explanation, no markdown, no commentary.
         parsed_contacts = call_openai_extraction(prompt, file_text, is_image, base64_img)
 
         results = []
+        enriched_contacts = []
+
         for contact in parsed_contacts:
             name = contact.get("name")
             company = contact.get("company")
             profiles = search_linkedin_profiles(name, company, max_results=3)
-            results.append({"name": name, "company": company, "profiles": profiles})
 
-        # ✅ Store in ChromaDB
-        store_contacts_in_chroma(parsed_contacts)
-        print("✅ Stored contacts in ChromaDB:", parsed_contacts)
+            # Add profiles to the contact
+            contact["profiles"] = profiles
+            enriched_contacts.append(contact)
+
+            results.append({
+                "name": name,
+                "company": company,
+                "profiles": profiles
+            })
+
+        # Store enriched contacts in ChromaDB
+        store_contacts_in_chroma(enriched_contacts)
+        print("✅ Stored enriched contacts in ChromaDB:", enriched_contacts)
 
         return {"contacts": results}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"OpenAI error: {e}")
 
+# 🔍 Manual LinkedIn search endpoint
+@app.post("/search_linkedin")
+def search_linkedin(req: SearchRequest):
+    candidates = search_linkedin_profiles(req.name, req.company, req.max_results)
+    return {
+        "message": "Manual selection recommended. Top 3 candidates returned.",
+        "candidates": candidates[:3]
+    }
+
+# Health check
 @app.get("/")
 def root():
     return {"message": "✅ API is running.", "docs": "/docs"}
->>>>>>> origin/Sparsh
+
+# 🤖 Chatbot interface
+@app.post("/chat")
+def chat_with_contacts(request: dict):
+    query = request.get("query")
+    return {"response": run_chatbot(query)}

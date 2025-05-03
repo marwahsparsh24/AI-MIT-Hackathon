@@ -1,11 +1,5 @@
 import os
 import re
-<<<<<<< HEAD
-from transformers import pipeline
-import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
-=======
 import json
 import fitz  # PyMuPDF
 import pandas as pd
@@ -14,7 +8,6 @@ import base64
 import io
 from dotenv import load_dotenv
 from openai import OpenAI
->>>>>>> origin/Sparsh
 
 # Load API keys
 load_dotenv()
