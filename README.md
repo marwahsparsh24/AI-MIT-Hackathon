@@ -9,6 +9,8 @@
 - View extracted records live
 ---
 ## Project Structure
+
+```bash
 my-crm/
 ├── backend/
 │   ├── main.py
