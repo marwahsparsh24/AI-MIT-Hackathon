@@ -1,96 +1,71 @@
 import os
-import pandas as pd
-import fitz  # PyMuPDF
-from PIL import Image
-import pytesseract
-import docx
 import re
+<<<<<<< HEAD
 from transformers import pipeline
 import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
+=======
+import json
+import fitz  # PyMuPDF
+import pandas as pd
+from PIL import Image
+import base64
+import io
+from dotenv import load_dotenv
+from openai import OpenAI
+>>>>>>> origin/Sparsh
 
-# Load the NER pipeline
-ner_pipeline = pipeline("ner", grouped_entities=True, model="dslim/bert-base-NER")
+# Load API keys
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise RuntimeError("❌ OPENAI_API_KEY is missing. Check your .env file.")
 
-def extract_info_from_file(file_path, filename):
-    ext = os.path.splitext(filename)[1].lower()
+# OpenAI client
+client = OpenAI(api_key=OPENAI_API_KEY)
 
-    if ext in ['.png', '.jpg', '.jpeg']:
-        text = pytesseract.image_to_string(Image.open(file_path))
-        return extract_named_entities(text)
+def extract_file_text(tmp_path, suffix, mime_type):
+    if mime_type and "pdf" in mime_type:
+        doc = fitz.open(tmp_path)
+        return "\n".join([page.get_text() for page in doc]), False, ""
+    elif mime_type and ("excel" in mime_type or suffix in ["xls", "xlsx"]):
+        df = pd.read_excel(tmp_path)
+        return df.to_string(), False, ""
+    elif mime_type and "image" in mime_type:
+        image = Image.open(tmp_path)
+        buf = io.BytesIO()
+        image.save(buf, format='PNG')
+        base64_img = base64.b64encode(buf.getvalue()).decode('utf-8')
+        return "", True, base64_img
+    else:
+        raise ValueError("Unsupported file type")
 
-    elif ext in ['.xlsx', '.xls', '.csv']:
-        return extract_from_excel(file_path)
+def call_openai_extraction(prompt, file_text, is_image, base64_img):
+    if is_image:
+        messages = [
+            {"role": "system", "content": "You are a contact parser from event documents and photos."},
+            {"role": "user", "content": [
+                {"type": "text", "text": prompt},
+                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{base64_img}"}}
+            ]}
+        ]
+        model = "gpt-4o"
+    else:
+        messages = [
+            {"role": "system", "content": "You are a contact parser from structured documents."},
+            {"role": "user", "content": f"{prompt}\n\n{file_text}"}
+        ]
+        model = "gpt-4-turbo"
 
-    elif ext == '.pdf':
-        return extract_from_pdf(file_path)
+    response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        temperature=0.2
+    )
 
-    elif ext == '.docx':
-        return extract_from_docx(file_path)
-
-    return []
-
-def extract_named_entities(text):
-    lines = text.split('\n')
-    results = []
-
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-
-        # Try regex-based structured extraction
-        match = re.match(r'^([\w\s&]+?)\s+([A-Z][\w\s&]+)\s+[–-]\s+(.+)$', line)
-        if match:
-            name = match.group(1).strip()
-            company = match.group(2).strip()
-            designation = match.group(3).strip()
-
-            results.append({
-                "name": name,
-                "company": company,
-                "designation": designation
-            })
-        else:
-            # fallback to NER
-            ner_result = ner_pipeline(line)
-            temp = {"name": None, "company": None}
-            for ent in ner_result:
-                label = ent["entity_group"]
-                if label == "PER" and not temp["name"]:
-                    temp["name"] = ent["word"]
-                elif label == "ORG" and not temp["company"]:
-                    temp["company"] = ent["word"]
-            if temp["name"] or temp["company"]:
-                results.append(temp)
-
-    return results
-
-def extract_from_excel(path):
-    df = pd.read_excel(path) if path.endswith('.xlsx') else pd.read_csv(path)
-    df = df.dropna(how='all')
-    df.columns = [col.lower().strip() for col in df.columns]
-    result = []
-
-    for _, row in df.iterrows():
-        name = row.get('name') or row.get('full name')
-        company = row.get('company') or row.get('organization')
-        designation = row.get('designation') or row.get('title')
-        if name or company or designation:
-            result.append({
-                "name": str(name).strip() if name else None,
-                "company": str(company).strip() if company else None,
-                "designation": str(designation).strip() if designation else None
-            })
-    return result
-
-def extract_from_pdf(path):
-    doc = fitz.open(path)
-    text = "\n".join([page.get_text() for page in doc])
-    return extract_named_entities(text)
-
-def extract_from_docx(path):
-    doc = docx.Document(path)
-    text = "\n".join([p.text for p in doc.paragraphs])
-    return extract_named_entities(text)
+    content = response.choices[0].message.content.strip()
+    if content.startswith("```json") or content.startswith("```"):
+        content = re.sub(r"^```(?:json)?", "", content).strip()
+        content = re.sub(r"```$", "", content).strip()
+    return json.loads(content)
