@@ -1,64 +1,74 @@
-# My CRM 
+# My CRM – Event Networking Assistant 
+
+A **personal CRM** built to help you manage contacts from networking events. Upload business cards, resumes, or attendee lists, extract names and affiliations, and send **personalized LinkedIn connection requests**. Later, query stored contact data using a chatbot interface.
 
 ---
+
 ## Features
 
-- Upload business card images, Excel/PDF files, or Word docs
-- Manual entry for individual contact details
-- Store structured data in ChromaDB
-- View extracted records live
+- Upload images, PDFs, Excel, or Word files containing contact details
+- Extract information like name, company, role
+- Store structured data in **ChromaDB** (no-SQL vector DB)
+- Manually add new contacts via form
+- Auto-send **LinkedIn connection requests** with event-based personalization
+- Query contacts using an **AI chatbot**
+
 ---
+
 ## Project Structure
 
 ```bash
-my-crm/
+AI-MIT-Hackathon/
 ├── backend/
 │   ├── main.py
 │   ├── models.py
 │   ├── extract_utils.py
 │   ├── chroma_utils.py
+│   ├── linkedin_sender.py
+│   ├── chatbot_utils.py
+│   ├── chroma_db/
+│   ├── temp_uploads/
 │   └── requirements.txt
-├── src/
-│   ├── components/
-│   │   ├── EventForm.jsx
-│   │   └── RecordList.jsx
-│   ├── App.jsx
-│   ├── App.css
-│   ├── index.js
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   │   └── FileUpload.jsx, ChatBot.jsx, etc.
+│   │   ├── App.jsx, App.css, index.js
 │   └── package.json
+└── README.md
 ```
----
 
-## Setup Instructions
+# Setup Instructions
 
-### Backend (FastAPI + ChromaDB)
+## Backend (FastAPI + ChromaDB)
 
-1. Navigate to the backend folder:
+1. Navigate to the backend directory:
 ```bash
-   cd backend
-   pip install -r requirements.txt
+cd backend
+pip install -r requirements.txt
 ```
 
-2. Install Tesseract OCR
+2. Install Tesseract OCR (used for image text extraction):
 Windows: https://github.com/tesseract-ocr/tesseract/wiki
 macOS: brew install tesseract
 Linux: sudo apt install tesseract-ocr
 
-3. In extract_utils.py, configure the Tesseract path:
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesse
-
-### Frontend (React)
-
-4. Run the backend server:
+3. Update path in extract_utils.py:
 ```bash
-uvicorn main:app --reload
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 ```
-6. Frontend (React)
-Navigate to the frontend:
+
+4. Update path in extract_utils.py:
 ```bash
-cd my-crm
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+```
+
+## Frontend (React)
+
+5. Open a new terminal, navigate to the frontend:
+```bash
+cd frontend
 npm install
-npm run dev  # or npm start
+npm run dev
 ```
-App will run on http://localhost:3000
-
