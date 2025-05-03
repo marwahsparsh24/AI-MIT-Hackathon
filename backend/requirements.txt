@@ -1,0 +1,10 @@
+uvicorn
+python-dotenv
+requests
+openai
+pymupdf         # For PDF text extraction
+pillow          # For image handling
+pandas          # For Excel parsing
+openpyxl        # Excel engine
+python-multipart
+google-generativeai

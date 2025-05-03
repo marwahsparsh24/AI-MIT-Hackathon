@@ -1,0 +1,204 @@
+/* Refined Vibrant Teal & Orange Design - App.css */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #00bcd4;
+  --primary-dark: #0097a7;
+  --primary-light: #b2ebf2;
+  --secondary-color: #ff6e40;
+  --secondary-dark: #f4511e;
+  --bg-color: #f5f7fa;
+  --card-bg: #ffffff;
+  --dark-text: #263238;
+  --light-text: #607d8b;
+  --border-color: #e0e0e0;
+  --hover-bg: #e0f7fa;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--bg-color);
+  margin: 0;
+  color: var(--dark-text);
+  line-height: 1.6;
+}
+
+.container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 188, 212, 0.3);
+  overflow: hidden;
+}
+
+header::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 0%,
+    rgba(255, 110, 64, 0.1) 50%,
+    transparent 100%
+  );
+  transform: rotate(30deg);
+  animation: shimmer 8s infinite linear;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-50%) rotate(30deg);
+  }
+  100% {
+    transform: translateX(50%) rotate(30deg);
+  }
+}
+
+header h1 {
+  font-size: 2.4rem;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  position: relative;
+}
+
+header p {
+  margin: 0.5rem 0 0;
+  font-size: 1.1rem;
+  opacity: 0.9;
+  font-weight: 400;
+  position: relative;
+}
+
+.main-grid {
+  display: flex;
+  gap: 2rem;
+  padding: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .main-grid {
+    flex-direction: column;
+  }
+  
+  .container {
+    padding: 1rem;
+  }
+}
+
+.left-panel,
+.right-panel {
+  flex: 1;
+  max-width: 100%;
+}
+
+.card, .uploaded {
+  background-color: var(--card-bg);
+  padding: 1.8rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.8rem;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.card::before, .uploaded::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--primary-color);
+}
+
+.card:hover, .uploaded:hover {
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+}
+
+.card h3, .uploaded h4 {
+  margin-top: 0;
+  font-weight: 600;
+  color: var(--dark-text);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: inline-block;
+  font-size: 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="text"],
+input[type="file"] {
+  width: 100%;
+  padding: 0.95rem 1.2rem;
+  margin: 0.75rem 0 1.5rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  background-color: var(--card-bg);
+  color: var(--dark-text);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  font-size: 0.95rem;
+}
+
+input[type="text"]:focus,
+input[type="file"]:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(0, 188, 212, 0.2);
+  background-color: var(--hover-bg);
+}
+
+input[type="text"]::placeholder {
+  color: var(--light-text);
+  opacity: 0.7;
+}
+
+button {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 0.95rem 1.8rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(255, 110, 64, 0.3);
+  font-family: 'Outfit', sans-serif;
+  display: inline-block;
+  text-align: center;
+}
+
+button:hover {
+  background-color: var(--secondary-dark);
+  box-shadow: 0 8px 25px rgba(255, 110, 64, 0.4);
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(255, 110, 64, 0.4);
+}
