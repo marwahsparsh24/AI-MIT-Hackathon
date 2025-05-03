@@ -1,16 +1,12 @@
 from pydantic import BaseModel
-from typing import Optional
 
-class ManualEntry(BaseModel):
-    name: Optional[str]
-    company: Optional[str]
-    designation: Optional[str]  # <-- Added
-    event_name: Optional[str]
-    source_file: Optional[str]
+class MessageRequest(BaseModel):
+    recipient_name: str
+    recipient_company: str
+    sender_name: str
+    context: str
 
-class FileUploadResponse(BaseModel):
-    name: Optional[str]
-    company: Optional[str]
-    designation: Optional[str]  # <-- Added
-    event_name: Optional[str]
-    source_file: str
+class SearchRequest(BaseModel):
+    name: str
+    company: str
+    max_results: int = 5
