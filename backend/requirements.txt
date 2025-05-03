@@ -8,3 +8,6 @@ pandas          # For Excel parsing
 openpyxl        # Excel engine
 python-multipart
 google-generativeai
+fastapi==0.103.1
+pydantic==2.3.0
+playwright==1.38.0
