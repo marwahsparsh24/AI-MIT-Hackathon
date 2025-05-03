@@ -39,4 +39,8 @@ async def add_file(file: UploadFile = File(...), event_name: Optional[str] = For
         records.append(record)
 
     insert_to_chroma(records)
-    return {"status": "success", "records_added": len(records)}
+    return {
+        "status": "success",
+        "records_added": len(records),
+        "extracted_data": records
+    }
