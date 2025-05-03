@@ -4,8 +4,10 @@ import fitz  # PyMuPDF
 from PIL import Image
 import pytesseract
 import docx
+import re
 from transformers import pipeline
 
+# Load the NER pipeline
 ner_pipeline = pipeline("ner", grouped_entities=True, model="dslim/bert-base-NER")
 
 def extract_info_from_file(file_path, filename):
@@ -27,17 +29,40 @@ def extract_info_from_file(file_path, filename):
     return []
 
 def extract_named_entities(text):
-    entities = ner_pipeline(text)
-    result = {"name": None, "company": None}
+    lines = text.split('\n')
+    results = []
 
-    for ent in entities:
-        label = ent["entity_group"]
-        if label == "PER" and not result["name"]:
-            result["name"] = ent["word"]
-        elif label == "ORG" and not result["company"]:
-            result["company"] = ent["word"]
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
 
-    return [result]
+        # Try regex-based structured extraction
+        match = re.match(r'^([\w\s&]+?)\s+([A-Z][\w\s&]+)\s+[–-]\s+(.+)$', line)
+        if match:
+            name = match.group(1).strip()
+            company = match.group(2).strip()
+            designation = match.group(3).strip()
+
+            results.append({
+                "name": name,
+                "company": company,
+                "designation": designation
+            })
+        else:
+            # fallback to NER
+            ner_result = ner_pipeline(line)
+            temp = {"name": None, "company": None}
+            for ent in ner_result:
+                label = ent["entity_group"]
+                if label == "PER" and not temp["name"]:
+                    temp["name"] = ent["word"]
+                elif label == "ORG" and not temp["company"]:
+                    temp["company"] = ent["word"]
+            if temp["name"] or temp["company"]:
+                results.append(temp)
+
+    return results
 
 def extract_from_excel(path):
     df = pd.read_excel(path) if path.endswith('.xlsx') else pd.read_csv(path)
@@ -48,10 +73,12 @@ def extract_from_excel(path):
     for _, row in df.iterrows():
         name = row.get('name') or row.get('full name')
         company = row.get('company') or row.get('organization')
-        if name or company:
+        designation = row.get('designation') or row.get('title')
+        if name or company or designation:
             result.append({
                 "name": str(name).strip() if name else None,
-                "company": str(company).strip() if company else None
+                "company": str(company).strip() if company else None,
+                "designation": str(designation).strip() if designation else None
             })
     return result
 

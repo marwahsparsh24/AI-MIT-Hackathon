@@ -1,10 +1,12 @@
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
+from typing import Optional, List
 import os
 import shutil
+
 from extract_utils import extract_info_from_file
 from chroma_utils import insert_to_chroma
+from models import FileUploadResponse  # optional use for response model
 
 app = FastAPI()
 
@@ -20,7 +22,7 @@ UPLOAD_DIR = "temp_uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.post("/add-file")
-async def add_file(file: UploadFile = File(...), event_name: Optional[str] = Form(None)):
+async def add_file(file: UploadFile = File(...), event_name: Optional[str] = Form(None)) -> dict:
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     with open(file_path, "wb") as f:
         shutil.copyfileobj(file.file, f)
@@ -33,6 +35,7 @@ async def add_file(file: UploadFile = File(...), event_name: Optional[str] = For
         record = {
             "name": entry.get("name"),
             "company": entry.get("company"),
+            "designation": entry.get("designation"),  # <-- Added
             "source_file": file.filename,
             "event_name": event_name,
         }
@@ -42,5 +45,5 @@ async def add_file(file: UploadFile = File(...), event_name: Optional[str] = For
     return {
         "status": "success",
         "records_added": len(records),
-        "extracted_data": records
+        "extracted_data": records  # ← Now includes designation
     }
