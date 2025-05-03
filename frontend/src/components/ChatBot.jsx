@@ -4,7 +4,7 @@ import "./ChatBot.css";
 const ChatBot = () => {
   const [messages, setMessages] = useState([
     { from: "bot", text: "Hi! Ask me about any contact or networking opportunity." }
-  ]);s
+  ]);
   const [input, setInput] = useState("");
 
   const handleSend = async () => {
