@@ -6,6 +6,9 @@ import pytesseract
 import docx
 import re
 from transformers import pipeline
+import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
 
 # Load the NER pipeline
 ner_pipeline = pipeline("ner", grouped_entities=True, model="dslim/bert-base-NER")
