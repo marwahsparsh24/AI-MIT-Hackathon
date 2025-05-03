@@ -26,7 +26,7 @@ my-crm/
 │   ├── App.css
 │   ├── index.js
 │   └── package.json
-
+```
 ---
 
 ## Setup Instructions
@@ -34,9 +34,10 @@ my-crm/
 ### Backend (FastAPI + ChromaDB)
 
 1. Navigate to the backend folder:
-   ```bash
+```bash
    cd backend
    pip install -r requirements.txt
+```
 
 2. Install Tesseract OCR
 Windows: https://github.com/tesseract-ocr/tesseract/wiki
@@ -49,12 +50,15 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesse
 ### Frontend (React)
 
 4. Run the backend server:
+```bash
 uvicorn main:app --reload
-
-5. Frontend (React)
+```
+6. Frontend (React)
 Navigate to the frontend:
+```bash
 cd my-crm
 npm install
 npm run dev  # or npm start
+```
 App will run on http://localhost:3000
 
