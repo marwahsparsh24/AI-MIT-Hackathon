@@ -5,6 +5,30 @@ import "./App.css";
 
 function App() {
   const [uploadedContacts, setUploadedContacts] = useState([]);
+  const [eventName, setEventName] = useState("");
+
+  const handleUploadComplete = (contacts, event) => {
+    setUploadedContacts(contacts);
+    setEventName(event);
+  };
+
+  const handleSendRequest = async (contact) => {
+    try {
+      const res = await fetch("http://localhost:8000/connect_and_send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: contact.name,
+          company: contact.company,
+          event_name: eventName,
+        }),
+      });
+      const data = await res.json();
+      alert(data.status || "Done");
+    } catch (err) {
+      alert("❌ Failed to send request");
+    }
+  };
 
   return (
     <div className="container">
@@ -14,16 +38,39 @@ function App() {
       </header>
       <main className="main-grid">
         <div className="left-panel">
-          <FileUpload onUploadComplete={setUploadedContacts} />
+          <FileUpload
+            onUploadComplete={(contacts) =>
+              handleUploadComplete(
+                contacts,
+                document.querySelector("input[type='text']").value
+              )
+            }
+          />
           <div className="uploaded">
             <h4>Uploaded Records</h4>
             {uploadedContacts.length === 0 ? (
               <p>No records to display</p>
             ) : (
               uploadedContacts.map((c, i) => (
-                <p key={i}>
-                  {c.name} – {c.company}
-                </p>
+                <div
+                  key={i}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "0.8rem",
+                  }}
+                >
+                  <span>
+                    {c.name} – {c.company}
+                  </span>
+                  <button
+                    onClick={() => handleSendRequest(c)}
+                    title={`Send a request to ${c.name} from ${c.company} about ${eventName}`}
+                  >
+                    Send Request
+                  </button>
+                </div>
               ))
             )}
           </div>

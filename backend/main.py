@@ -6,12 +6,14 @@ import mimetypes
 import requests
 from dotenv import load_dotenv
 import os
-
 from openai import OpenAI
 from extract_utils import extract_file_text, call_openai_extraction
 from models import MessageRequest, SearchRequest
 from chroma_utils import store_contacts_in_chroma
 from chatbot_utils import run_chatbot
+from pydantic import BaseModel
+from linkedin_sender import connect_and_send
+from serpapi  import GoogleSearch
 
 # Load environment variables
 load_dotenv()
@@ -120,3 +122,15 @@ def root():
 def chat_with_contacts(request: dict):
     query = request.get("query")
     return {"response": run_chatbot(query)}
+
+class ConnectionRequest(BaseModel):
+    name: str
+    company: str
+    event_name: str
+
+@app.post("/connect_and_send")
+async def auto_connect(request: ConnectionRequest):
+    result = connect_and_send(
+        request.name, request.company, request.event_name, headless=False
+    )
+    return result

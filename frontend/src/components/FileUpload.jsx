@@ -10,14 +10,15 @@ const FileUpload = ({ onUploadComplete }) => {
     if (!file || !eventName) return alert("Please enter event name and file.");
     const formData = new FormData();
     formData.append("file", file);
-
+  
     try {
       const res = await axios.post("http://localhost:8000/upload_and_extract", formData);
-      onUploadComplete(res.data.contacts);
+      onUploadComplete(res.data.contacts, eventName);
     } catch (err) {
+      console.error(err.response?.data || err.message);  // ✅ better logging
       alert("Upload failed.");
     }
-  };
+  };  
 
   return (
     <div className="card">
