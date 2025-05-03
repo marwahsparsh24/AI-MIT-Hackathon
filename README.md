@@ -11,19 +11,19 @@
 ## Project Structure
 my-crm/
 ├── backend/
-│ ├── main.py
-│ ├── models.py
-│ ├── extract_utils.py
-│ ├── chroma_utils.py
-│ └── requirements.txt
-└── src/
-├── components/
-│ ├── EventForm.jsx
-│ ├── RecordList.jsx
-├── App.jsx
-├── App.css
-├── index.js
-└── package.json
+│   ├── main.py
+│   ├── models.py
+│   ├── extract_utils.py
+│   ├── chroma_utils.py
+│   └── requirements.txt
+├── src/
+│   ├── components/
+│   │   ├── EventForm.jsx
+│   │   └── RecordList.jsx
+│   ├── App.jsx
+│   ├── App.css
+│   ├── index.js
+│   └── package.json
 
 ---
 
